@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'to_do_classes.dart';
 
 class toDoPage extends StatefulWidget {
   final TodoList todoList;
+  final HomeModel model;
 
-  const toDoPage({super.key, required this.todoList});
+  const toDoPage({super.key, required this.todoList, required this.model});
 
   @override
   State<toDoPage> createState() => _toDoPageState();
@@ -16,23 +18,24 @@ class _toDoPageState extends State<toDoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final model = Provider.of<HomeModel>(context);
     return Scaffold(
       appBar: buildAppBar(widget.todoList.name,),
-      floatingActionButton: buildFloatingAddButton(context),
-      body: buildBody(),
+      floatingActionButton: buildFloatingAddButton(context, model),
+      body: buildBody(model),
     );
   }
 
-  FloatingActionButton buildFloatingAddButton(BuildContext context) {
+  FloatingActionButton buildFloatingAddButton(BuildContext context, HomeModel model) {
     return FloatingActionButton(
       onPressed: () {
-        popUp(context);
+        popUp(context, model);
       },
       child: const Icon(Icons.add),
     );
   }
 
-  void popUp(BuildContext context) {
+  void popUp(BuildContext context, HomeModel model) {
     _listNameController.clear();
     showDialog(
         context: context,
@@ -55,9 +58,10 @@ class _toDoPageState extends State<toDoPage> {
                 onPressed: () {
                   final name = _listNameController.text.trim();
                   if (name.isNotEmpty) {
-                    setState(() {
-                      _todoItems.add(TodoItem(title: name, isDone: false));
-                    });
+                    final listIndex = model.todoLists.indexOf(widget.todoList);
+                    if (listIndex != -1) {
+                      model.addItem(listIndex, name);
+                    }
                   }
                   Navigator.of(context).pop();
                 },
@@ -75,19 +79,17 @@ class _toDoPageState extends State<toDoPage> {
     );
   }
 
-  Widget buildBody() {
+  Widget buildBody(HomeModel model) {
     if (_todoItems.isEmpty) {
       return Center(child: Text("Items in ${widget.todoList.name} komen hier"));
     }
 
+    final listIndex = model.todoLists.indexOf(widget.todoList);
+
     return ReorderableListView.builder(
       itemCount: _todoItems.length,
       onReorder: (oldIndex, newIndex) {
-        setState(() {
-          if (newIndex > oldIndex) newIndex -= 1;
-          final item = _todoItems.removeAt(oldIndex);
-          _todoItems.insert(newIndex, item);
-        });
+        model.reorderItems(listIndex, oldIndex, newIndex);
       },
       padding: const EdgeInsets.all(12),
       itemBuilder: (context, index) {
@@ -105,17 +107,13 @@ class _toDoPageState extends State<toDoPage> {
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
-                  setState(() {
-                    _todoItems.removeAt(index);
-                  });
+                  model.removeItem(listIndex, index);
                 },
               ),
               Checkbox(
                 value: list.isDone,
                 onChanged: (value) {
-                  setState(() {
-                    list.isDone = value ?? false;
-                  });
+                  model.toggleItemDone(listIndex, index, value);
                 },
               ),
               const SizedBox(width: 24),

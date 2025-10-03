@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/pages/home.dart';
+import 'package:to_do/pages/to_do_classes.dart';
+import 'package:provider/provider.dart';
+
+// TODO: BUG - ALS MULTPLE instanties (TODO of lijst pijn)
+// TODO: Priority
+// TODO: presisten storage
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => HomeModel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
