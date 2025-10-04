@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/pages/home.dart';
-import 'package:to_do/pages/to_do_classes.dart';
+import 'package:to_do/pages/models.dart';
 import 'package:provider/provider.dart';
 
 // TODO: BUG - ALS MULTPLE instanties (TODO of lijst pijn)
 // TODO: Priority
-// TODO: presisten storage
+// TODO: EXTRA - Dark mode
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final model = HomeModel();
+  await model.loadTodos();
+
   runApp(
     ChangeNotifierProvider(
-      create: (context) => HomeModel(),
+      create: (_) => model,
       child: const MyApp(),
     ),
   );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'to_do_classes.dart';
+import 'models.dart';
 
 class toDoPage extends StatefulWidget {
   final TodoList todoList;
