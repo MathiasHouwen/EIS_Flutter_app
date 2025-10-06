@@ -93,12 +93,21 @@ class _toDoPageState extends State<toDoPage> {
       },
       padding: const EdgeInsets.all(12),
       itemBuilder: (context, index) {
-        final list = _todoItems[index];
+        final item = _todoItems[index];
         return ListTile(
-          key: ValueKey(list.title),
-          leading: const Icon(Icons.list),
+          key: ValueKey(item.title),
+          leading: IconButton(
+            icon: Icon(
+              item.isFavourite ? Icons.star : Icons.star_border,
+              color: item.isFavourite ? Colors.amber : Colors.grey,
+            ),
+            onPressed: () {
+              model.toggleFavourite(listIndex, index);
+            },
+          ),
+
           title: Text(
-            list.title,
+            item.title,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           trailing: Row(
@@ -111,7 +120,7 @@ class _toDoPageState extends State<toDoPage> {
                 },
               ),
               Checkbox(
-                value: list.isDone,
+                value: item.isDone,
                 onChanged: (value) {
                   model.toggleItemDone(listIndex, index, value);
                 },

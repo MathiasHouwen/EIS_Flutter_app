@@ -6,26 +6,25 @@ import 'package:path_provider/path_provider.dart';
 class TodoItem {
   String title;
   bool isDone;
+  bool isFavourite;
 
-  TodoItem({required this.title, this.isDone = false});
+  TodoItem({
+    required this.title,
+    this.isDone = false,
+    this.isFavourite = false,
+  });
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'isDone': isDone,
+    'isFavourite': isFavourite,
   };
 
   factory TodoItem.fromJson(Map<String, dynamic> json) => TodoItem(
     title: json['title'],
     isDone: json['isDone'] ?? false,
+    isFavourite: json['isFavourite'] ?? false,
   );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is TodoItem && runtimeType == other.runtimeType && title == other.title;
-
-  @override
-  int get hashCode => title.hashCode;
 }
 
 class TodoList {
@@ -46,14 +45,6 @@ class TodoList {
         .map((e) => TodoItem.fromJson(e))
         .toList(),
   );
-
-  //@override
-  //bool operator ==(Object other) =>
-  //    identical(this, other) ||
-  //        other is TodoList && runtimeType == other.runtimeType && name == other.name;
-//
-  //@override
-  //int get hashCode => name.hashCode;
 }
 
 class Storage{
@@ -136,6 +127,7 @@ class HomeModel extends ChangeNotifier{
     if (_todoLists[listIndex].items.any((item) => item.title == title)) return;
 
     _todoLists[listIndex].items.add(TodoItem(title: title));
+    _sortItems(listIndex);
     _save();
     notifyListeners();
   }
@@ -160,4 +152,21 @@ class HomeModel extends ChangeNotifier{
     _save();
     notifyListeners();
   }
+
+  void _sortItems(int listIndex) {
+    _todoLists[listIndex].items.sort((a, b) {
+      if (a.isFavourite == b.isFavourite) return 0;
+      return a.isFavourite ? -1 : 1;
+    });
+  }
+
+  void toggleFavourite(int listIndex, int itemIndex) {
+    final item = _todoLists[listIndex].items[itemIndex];
+    item.isFavourite = !item.isFavourite;
+
+    _sortItems(listIndex);
+    _save();
+    notifyListeners();
+  }
+
 }
