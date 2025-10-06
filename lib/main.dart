@@ -3,9 +3,11 @@ import 'package:to_do/pages/home.dart';
 import 'package:to_do/pages/models.dart';
 import 'package:provider/provider.dart';
 
-// TODO: BUG - ALS MULTPLE instanties (TODO of lijst pijn)
 // TODO: Priority
-// TODO: EXTRA - Dark mode
+// TODO: todo discription
+// TODO: completed, subsection
+// TODO: EXTRA - DARK MODE
+// TODO: EXTRA - DEADLINE
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -19,6 +19,13 @@ class TodoItem {
     isDone: json['isDone'] ?? false,
   );
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is TodoItem && runtimeType == other.runtimeType && title == other.title;
+
+  @override
+  int get hashCode => title.hashCode;
 }
 
 class TodoList {
@@ -39,6 +46,14 @@ class TodoList {
         .map((e) => TodoItem.fromJson(e))
         .toList(),
   );
+
+  //@override
+  //bool operator ==(Object other) =>
+  //    identical(this, other) ||
+  //        other is TodoList && runtimeType == other.runtimeType && name == other.name;
+//
+  //@override
+  //int get hashCode => name.hashCode;
 }
 
 class Storage{
@@ -92,6 +107,7 @@ class HomeModel extends ChangeNotifier{
   // ---
 
   void addList(String name) {
+    if (_todoLists.any((list) => list.name == name)) return;
     _todoLists.add(TodoList(name: name));
     _save();
     notifyListeners();
@@ -117,6 +133,8 @@ class HomeModel extends ChangeNotifier{
 
   void addItem(int listIndex, String title) {
     if (listIndex < 0 || listIndex >= _todoLists.length) return;
+    if (_todoLists[listIndex].items.any((item) => item.title == title)) return;
+
     _todoLists[listIndex].items.add(TodoItem(title: title));
     _save();
     notifyListeners();
