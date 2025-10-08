@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/pages/home.dart';
-import 'package:to_do/pages/models.dart';
+import 'package:to_do/models.dart';
 import 'package:provider/provider.dart';
-
-// TODO: completed, subsection
-// TODO: EXTRA - DARK MODE
-// TODO: EXTRA - DEADLINE
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

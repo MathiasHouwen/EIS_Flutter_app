@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do/pages/to_do_page.dart';
-import 'models.dart';
+import '../models.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
