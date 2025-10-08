@@ -116,62 +116,121 @@ class _toDoPageState extends State<toDoPage> {
   }
 
   Widget buildBody(HomeModel model) {
-    if (_todoItems.isEmpty) {
+    final listIndex = model.todoLists.indexOf(widget.todoList);
+    final completedItems = model.getCompletedItems(listIndex);
+    final incompleteItems = model.getIncompleteItems(listIndex);
+
+    if (model.todoLists[listIndex].items.isEmpty) {
       return Center(child: Text("Items in ${widget.todoList.name} komen hier"));
     }
 
-    final listIndex = model.todoLists.indexOf(widget.todoList);
-
-    return ReorderableListView.builder(
-      itemCount: _todoItems.length,
-      onReorder: (oldIndex, newIndex) {
-        model.reorderItems(listIndex, oldIndex, newIndex);
-      },
-      padding: const EdgeInsets.all(12),
-      itemBuilder: (context, index) {
-        final item = _todoItems[index];
-        return ListTile(
-          key: ValueKey(item.title),
-          leading: IconButton(
-            icon: Icon(
-              item.isFavourite ? Icons.star : Icons.star_border,
-              color: item.isFavourite ? Colors.amber : Colors.grey,
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        children: [
+          if (completedItems.isNotEmpty)
+            ExpansionTile(
+              title: Text(
+                "Voltooide taken (${completedItems.length})",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              children: completedItems.map((item) {
+                final index =
+                model.todoLists[listIndex].items.indexOf(item);
+                return ListTile(
+                  key: ValueKey(item.title),
+                  title: Text(
+                    item.title,
+                    style: const TextStyle(
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          model.removeItem(listIndex, index);
+                        },
+                      ),
+                      Checkbox(
+                        value: item.isDone,
+                        onChanged: (value) {
+                          model.toggleItemDone(listIndex, index, value);
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    showDescriptionDialog(index);
+                  },
+                );
+              }).toList(),
             ),
-            onPressed: () {
-              model.toggleFavourite(listIndex, index);
-            },
-          ),
 
-          title: Text(
-            item.title,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          const SizedBox(height: 10),
+
+          Expanded(
+            child: ReorderableListView.builder(
+              itemCount: incompleteItems.length,
+              onReorder: (oldIndex, newIndex) {
+                model.reorderIncompleteItems(listIndex, oldIndex, newIndex);
+              },
+              itemBuilder: (context, index) {
+                final item = incompleteItems[index];
+                final realIndex =
+                model.todoLists[listIndex].items.indexOf(item);
+
+                return ListTile(
+                  key: ValueKey(item.title),
+                  leading: IconButton(
+                    icon: Icon(
+                      item.isFavourite ? Icons.star : Icons.star_border,
+                      color: item.isFavourite ? Colors.amber : Colors.grey,
+                    ),
+                    onPressed: () {
+                      model.toggleFavourite(listIndex, realIndex);
+                    },
+                  ),
+                  title: Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          model.removeItem(listIndex, realIndex);
+                        },
+                      ),
+                      Checkbox(
+                        value: item.isDone,
+                        onChanged: (value) {
+                          model.toggleItemDone(listIndex, realIndex, value);
+                        },
+                      ),
+                      const SizedBox(width: 24),
+                    ],
+                  ),
+                  onTap: () {
+                    showDescriptionDialog(realIndex);
+                  },
+                );
+              },
+            ),
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  model.removeItem(listIndex, index);
-                },
-              ),
-              Checkbox(
-                value: item.isDone,
-                onChanged: (value) {
-                  model.toggleItemDone(listIndex, index, value);
-                },
-              ),
-              const SizedBox(width: 24),
-            ],
-          ),
-          onTap: () {
-            // Discription
-            showDescriptionDialog(index);
-          },
-        );
-      },
+        ],
+      ),
     );
   }
+
 
   void showDescriptionDialog(int itemIndex) {
     final item = _todoItems[itemIndex];

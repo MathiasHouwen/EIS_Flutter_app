@@ -155,6 +155,33 @@ class HomeModel extends ChangeNotifier{
     notifyListeners();
   }
 
+  void reorderIncompleteItems(int listIndex, int oldIndex, int newIndex) {
+    final items = _todoLists[listIndex].items;
+    final incomplete = getIncompleteItems(listIndex);
+
+    if (oldIndex < 0 || oldIndex >= incomplete.length) return;
+    if (newIndex > incomplete.length) newIndex = incomplete.length;
+
+    final item = incomplete[oldIndex];
+
+    final realOldIndex = items.indexOf(item);
+    final realNewIndex = (newIndex >= incomplete.length)
+        ? items.length
+        : items.indexOf(incomplete[newIndex]);
+
+    if (realNewIndex > realOldIndex) {
+      final adjustedNewIndex = realNewIndex - 1;
+      final removed = items.removeAt(realOldIndex);
+      items.insert(adjustedNewIndex, removed);
+    } else {
+      final removed = items.removeAt(realOldIndex);
+      items.insert(realNewIndex, removed);
+    }
+
+    _save();
+    notifyListeners();
+  }
+
   void toggleItemDone(int listIndex, int itemIndex, bool? value) {
     _todoLists[listIndex].items[itemIndex].isDone = value ?? false;
     _save();
@@ -177,4 +204,9 @@ class HomeModel extends ChangeNotifier{
     notifyListeners();
   }
 
+  List<TodoItem> getIncompleteItems(int listIndex) =>
+      _todoLists[listIndex].items.where((i) => !i.isDone).toList();
+
+  List<TodoItem> getCompletedItems(int listIndex) =>
+      _todoLists[listIndex].items.where((i) => i.isDone).toList();
 }
