@@ -173,59 +173,71 @@ class _toDoPageState extends State<toDoPage> {
           const SizedBox(height: 10),
 
           Expanded(
-            child: ReorderableListView.builder(
-              itemCount: incompleteItems.length,
-              onReorder: (oldIndex, newIndex) {
-                model.reorderIncompleteItems(listIndex, oldIndex, newIndex);
-              },
-              itemBuilder: (context, index) {
-                final item = incompleteItems[index];
-                final realIndex =
-                model.todoLists[listIndex].items.indexOf(item);
+            child: () {
+              if (incompleteItems.isEmpty) {
+                return Center(
+                  child: Text(
+                    "Geen taken hier",
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                );
+              } else {
+                return ReorderableListView.builder(
+                  itemCount: incompleteItems.length,
+                  onReorder: (oldIndex, newIndex) {
+                    model.reorderIncompleteItems(listIndex, oldIndex, newIndex);
+                  },
+                  itemBuilder: (context, index) {
+                    final item = incompleteItems[index];
+                    final realIndex =
+                    model.todoLists[listIndex].items.indexOf(item);
 
-                return ListTile(
-                  key: ValueKey(item.title),
-                  leading: IconButton(
-                    icon: Icon(
-                      item.isFavourite ? Icons.star : Icons.star_border,
-                      color: item.isFavourite ? Colors.amber : Colors.grey,
-                    ),
-                    onPressed: () {
-                      model.toggleFavourite(listIndex, realIndex);
-                    },
-                  ),
-                  title: Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
+                    return ListTile(
+                      key: ValueKey(item.title),
+                      leading: IconButton(
+                        icon: Icon(
+                          item.isFavourite ? Icons.star : Icons.star_border,
+                          color: item.isFavourite ? Colors.amber : Colors.grey,
+                        ),
                         onPressed: () {
-                          model.removeItem(listIndex, realIndex);
+                          model.toggleFavourite(listIndex, realIndex);
                         },
                       ),
-                      Checkbox(
-                        value: item.isDone,
-                        onChanged: (value) {
-                          model.toggleItemDone(listIndex, realIndex, value);
-                        },
+                      title: Text(
+                        item.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
-                      const SizedBox(width: 24),
-                    ],
-                  ),
-                  onTap: () {
-                    showDescriptionDialog(realIndex);
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              model.removeItem(listIndex, realIndex);
+                            },
+                          ),
+                          Checkbox(
+                            value: item.isDone,
+                            onChanged: (value) {
+                              model.toggleItemDone(listIndex, realIndex, value);
+                            },
+                          ),
+                          const SizedBox(width: 24),
+                        ],
+                      ),
+                      onTap: () {
+                        showDescriptionDialog(realIndex);
+                      },
+                    );
                   },
                 );
-              },
-            ),
-          ),
+              }
+            }(),
+          )
+
         ],
       ),
     );
