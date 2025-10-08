@@ -3,7 +3,6 @@ import 'package:to_do/pages/home.dart';
 import 'package:to_do/pages/models.dart';
 import 'package:provider/provider.dart';
 
-// TODO: todo discription & pop-up down
 // TODO: completed, subsection
 // TODO: EXTRA - DARK MODE
 // TODO: EXTRA - DEADLINE

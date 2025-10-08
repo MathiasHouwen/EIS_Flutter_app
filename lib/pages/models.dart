@@ -7,23 +7,27 @@ class TodoItem {
   String title;
   bool isDone;
   bool isFavourite;
+  String description;
 
   TodoItem({
     required this.title,
     this.isDone = false,
     this.isFavourite = false,
+    this.description = "",
   });
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'isDone': isDone,
     'isFavourite': isFavourite,
+    'description': description,
   };
 
   factory TodoItem.fromJson(Map<String, dynamic> json) => TodoItem(
     title: json['title'],
     isDone: json['isDone'] ?? false,
     isFavourite: json['isFavourite'] ?? false,
+    description: json['description'] ?? "",
   );
 }
 
@@ -94,6 +98,10 @@ class HomeModel extends ChangeNotifier{
 
   Future<void> _save() async {
     await _storage.saveData(_todoLists);
+  }
+
+  Future<void> save() async {
+    await _save();
   }
   // ---
 

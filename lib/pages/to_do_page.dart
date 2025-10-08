@@ -15,6 +15,7 @@ class toDoPage extends StatefulWidget {
 class _toDoPageState extends State<toDoPage> {
   late final _todoItems = widget.todoList.items;
   final TextEditingController _listNameController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -37,39 +38,74 @@ class _toDoPageState extends State<toDoPage> {
 
   void popUp(BuildContext context, HomeModel model) {
     _listNameController.clear();
-    showDialog(
-        context: context,
-        builder: (context){
-          return AlertDialog(
-            title: Text("Naam van de todo lijst"),
-            content: TextField(
-              controller: _listNameController,
-              decoration: const InputDecoration(hintText: "Enter list name"),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Voeg toe'),
-                onPressed: () {
-                  final name = _listNameController.text.trim();
-                  if (name.isNotEmpty) {
-                    final listIndex = model.todoLists.indexOf(widget.todoList);
-                    if (listIndex != -1) {
-                      model.addItem(listIndex, name);
-                    }
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _focusNode.requestFocus();
         });
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            left: 20,
+            right: 20,
+            top: 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Naam van de todo lijst",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _listNameController,
+                focusNode: _focusNode,
+                decoration: const InputDecoration(
+                  hintText: "Enter list name",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    child: const Text('Cancel'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    child: const Text('Voeg toe'),
+                    onPressed: () {
+                      final name = _listNameController.text.trim();
+                      if (name.isNotEmpty) {
+                        final listIndex = model.todoLists.indexOf(widget.todoList);
+                        if (listIndex != -1) {
+                          model.addItem(listIndex, name);
+                        }
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
   }
+
+
 
   AppBar buildAppBar(String title) {
     return AppBar(
@@ -130,7 +166,44 @@ class _toDoPageState extends State<toDoPage> {
           ),
           onTap: () {
             // Discription
+            showDescriptionDialog(index);
           },
+        );
+      },
+    );
+  }
+
+  void showDescriptionDialog(int itemIndex) {
+    final item = _todoItems[itemIndex];
+    final TextEditingController _descController = TextEditingController(text: item.description);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Beschrijving voor '${item.title}'"),
+          content: TextField(
+            controller: _descController,
+            decoration: const InputDecoration(
+              hintText: "Voeg een beschrijving toe",
+            ),
+            maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Annuleer"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                item.description = _descController.text.trim();
+                widget.model.save(); // save changes
+                setState(() {});     // refresh UI
+                Navigator.of(context).pop();
+              },
+              child: const Text("Opslaan"),
+            ),
+          ],
         );
       },
     );
